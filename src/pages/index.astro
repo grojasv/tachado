@@ -1,0 +1,56 @@
+---
+import Layout from '../layouts/Layout.astro';
+import DevFooter from '../components/DevFooter.astro';
+---
+
+<Layout title="Tachado - Todo App">
+	<div class="max-w-md mx-auto">
+		<!-- Header -->
+		<header class="text-center mb-8">
+			<h1 class="text-3xl font-bold text-gray-800 mb-2">Tachado</h1>
+			<p class="text-gray-600">Simple, smooth todo lists</p>
+		</header>
+
+		<!-- Todo Input -->
+		<div class="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-6 mb-6">
+			<div class="flex items-center space-x-3">
+				<input 
+					type="text" 
+					placeholder="Add a new todo..." 
+					class="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+					id="todoInput"
+				>
+				<button 
+					class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+					id="addTodoBtn"
+				>
+					Add
+				</button>
+			</div>
+		</div>
+
+		<!-- Active Todos -->
+		<div class="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-6 mb-6">
+			<h2 class="text-lg font-semibold text-gray-800 mb-4">Active Todos</h2>
+			<div id="activeTodos" class="space-y-3">
+				<!-- Todo items will be added here dynamically -->
+			</div>
+		</div>
+
+		<!-- Completed Todos -->
+		<div class="bg-white/60 backdrop-blur-sm rounded-lg shadow-lg p-6">
+			<h2 class="text-lg font-semibold text-gray-600 mb-4">Completed</h2>
+			<div id="completedTodos" class="space-y-3">
+				<!-- Completed items will be moved here -->
+			</div>
+		</div>
+	</div>
+
+	<!-- Development Footer -->
+	<DevFooter />
+</Layout>
+
+<script>
+	// Basic todo functionality will be implemented in Phase 2
+	console.log('Tachado todo app initialized');
+</script>

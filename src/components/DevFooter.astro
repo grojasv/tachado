@@ -1,0 +1,38 @@
+---
+// Get the latest commit information for development footer
+let commitInfo = {
+	hash: 'dev',
+	date: new Date().toISOString(),
+	message: 'Development build'
+};
+
+// Try to get git commit info if available
+try {
+	const { execSync } = await import('child_process');
+	const gitHash = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
+	const gitDate = execSync('git log -1 --format=%cd --date=iso', { encoding: 'utf8' }).trim();
+	const gitMessage = execSync('git log -1 --format=%s', { encoding: 'utf8' }).trim();
+	
+	commitInfo = {
+		hash: gitHash,
+		date: gitDate,
+		message: gitMessage
+	};
+} catch (error) {
+	// Fallback to development info if git is not available
+	console.log('Git information not available, using development info');
+}
+---
+
+<!-- Development Footer - Shows latest commit info -->
+<footer class="fixed bottom-0 left-0 right-0 bg-black/10 backdrop-blur-sm border-t border-white/20 text-xs text-gray-600 p-2 text-center">
+	<div class="flex items-center justify-center space-x-2">
+		<span class="font-mono">Tachado</span>
+		<span>•</span>
+		<span class="font-mono">{commitInfo.hash}</span>
+		<span>•</span>
+		<span>{new Date(commitInfo.date).toLocaleDateString()}</span>
+		<span>•</span>
+		<span class="truncate max-w-32">{commitInfo.message}</span>
+	</div>
+</footer> 
