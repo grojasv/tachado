@@ -1,1 +1,65 @@
 @import "tailwindcss";
+
+/* Enhanced animations for Tachado todo app */
+@layer components {
+  /* Smooth transitions for todo items */
+  .todo-item {
+    @apply transition-all duration-300 ease-in-out;
+  }
+
+  /* Enhanced hover effects */
+  .todo-item:hover {
+    @apply transform scale-[1.02] shadow-md;
+  }
+
+  /* Smooth strike-through animation */
+  .todo-text {
+    @apply transition-all duration-300 ease-in-out;
+  }
+
+  /* Enhanced checkbox styling */
+  input[type="checkbox"] {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  input[type="checkbox"]:checked {
+    @apply transform scale-110;
+  }
+
+  /* Smooth button transitions */
+  button {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  /* Enhanced input focus states */
+  input:focus {
+    @apply transform scale-[1.01];
+  }
+
+  /* Glass morphism enhancement */
+  .glass-effect {
+    @apply bg-white/80 backdrop-blur-sm;
+  }
+
+  /* Mobile-first touch targets */
+  @media (max-width: 768px) {
+    .todo-item {
+      @apply min-h-[60px] p-4;
+    }
+    
+    input[type="checkbox"] {
+      @apply w-6 h-6;
+    }
+    
+    button {
+      @apply min-h-[44px] px-4;
+    }
+  }
+
+  /* Reduced motion for accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      @apply transition-none duration-0;
+    }
+  }
+}
