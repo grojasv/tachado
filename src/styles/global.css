@@ -62,4 +62,26 @@
       @apply transition-none duration-0;
     }
   }
+
+  /* Drag and Drop Styles */
+  .sortable-ghost {
+    @apply opacity-50 bg-blue-100 border-blue-300;
+  }
+
+  .sortable-chosen {
+    @apply shadow-lg transform scale-105;
+  }
+
+  .sortable-drag {
+    @apply shadow-xl transform rotate-2deg;
+  }
+
+  /* Cursor styles for drag and drop */
+  .todo-item {
+    @apply cursor-grab;
+  }
+
+  .todo-item:active {
+    @apply cursor-grabbing;
+  }
 }

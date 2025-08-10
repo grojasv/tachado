@@ -51,8 +51,10 @@ import DevFooter from '../components/DevFooter.astro';
 </Layout>
 
 <script>
-	// Phase 2: Core Todo UI Implementation
-	// This script handles todo creation, completion, and smooth animations
+	// Phase 3: Drag and Drop Implementation
+	// This script handles todo creation, completion, smooth animations, and drag-and-drop reordering
+	
+	// SortableJS will be loaded from CDN
 
 	// Get DOM elements
 	const todoInput = document.getElementById('todoInput') as HTMLInputElement;
@@ -69,6 +71,7 @@ import DevFooter from '../components/DevFooter.astro';
 		text: string;
 		completed: boolean;
 		createdAt: Date;
+		order: number;
 	}
 
 	// Generate unique ID for todo items
@@ -114,7 +117,8 @@ import DevFooter from '../components/DevFooter.astro';
 			id: generateId(),
 			text: text.trim(),
 			completed: false,
-			createdAt: new Date()
+			createdAt: new Date(),
+			order: todos.length
 		};
 
 		todos.push(newTodo);
@@ -166,6 +170,8 @@ import DevFooter from '../components/DevFooter.astro';
 				todoElement.style.transition = 'all 0.4s ease-in-out';
 				todoElement.style.transform = 'scale(0.98)';
 				todoElement.style.opacity = '0.8';
+				// Update order after moving
+				updateTodoOrder();
 			}, 150);
 		} else {
 			// Animate back to active section
@@ -178,6 +184,8 @@ import DevFooter from '../components/DevFooter.astro';
 				todoElement.style.transition = 'all 0.4s ease-in-out';
 				todoElement.style.transform = 'scale(1)';
 				todoElement.style.opacity = '1';
+				// Update order after moving
+				updateTodoOrder();
 			}, 150);
 		}
 
@@ -215,8 +223,11 @@ import DevFooter from '../components/DevFooter.astro';
 		activeTodos.innerHTML = '';
 		completedTodos.innerHTML = '';
 
+		// Sort todos by order
+		const sortedTodos = [...todos].sort((a, b) => (a.order || 0) - (b.order || 0));
+
 		// Render each todo in appropriate section
-		todos.forEach(todo => {
+		sortedTodos.forEach(todo => {
 			const todoElement = createTodoElement(todo);
 			if (todo.completed) {
 				completedTodos.appendChild(todoElement);
@@ -235,9 +246,88 @@ import DevFooter from '../components/DevFooter.astro';
 		}
 	});
 
+	// Initialize drag-and-drop functionality
+	function initializeSortable() {
+		// Initialize SortableJS for active todos
+		new Sortable(activeTodos, {
+			group: 'todos',
+			animation: 300,
+			ghostClass: 'sortable-ghost',
+			chosenClass: 'sortable-chosen',
+			dragClass: 'sortable-drag',
+			onStart: function(evt) {
+				// Add haptic feedback for mobile devices
+				if ('vibrate' in navigator) {
+					navigator.vibrate(50);
+				}
+				evt.item.style.opacity = '0.8';
+				evt.item.style.transform = 'rotate(2deg)';
+			},
+			onEnd: function(evt) {
+				evt.item.style.opacity = '1';
+				evt.item.style.transform = 'rotate(0deg)';
+				
+				// Update todo order in data
+				updateTodoOrder();
+			}
+		});
+
+		// Initialize SortableJS for completed todos
+		new Sortable(completedTodos, {
+			group: 'todos',
+			animation: 300,
+			ghostClass: 'sortable-ghost',
+			chosenClass: 'sortable-chosen',
+			dragClass: 'sortable-drag',
+			onStart: function(evt) {
+				// Add haptic feedback for mobile devices
+				if ('vibrate' in navigator) {
+					navigator.vibrate(50);
+				}
+				evt.item.style.opacity = '0.8';
+				evt.item.style.transform = 'rotate(2deg)';
+			},
+			onEnd: function(evt) {
+				evt.item.style.opacity = '1';
+				evt.item.style.transform = 'rotate(0deg)';
+				
+				// Update todo order in data
+				updateTodoOrder();
+			}
+		});
+	}
+
+	// Update todo order based on current DOM order
+	function updateTodoOrder() {
+		const activeTodoElements = activeTodos.querySelectorAll('.todo-item');
+		const completedTodoElements = completedTodos.querySelectorAll('.todo-item');
+		
+		// Update active todos order
+		activeTodoElements.forEach((element, index) => {
+			const todoId = element.dataset.todoId;
+			const todo = todos.find(t => t.id === todoId);
+			if (todo) {
+				todo.order = index;
+			}
+		});
+		
+		// Update completed todos order
+		completedTodoElements.forEach((element, index) => {
+			const todoId = element.dataset.todoId;
+			const todo = todos.find(t => t.id === todoId);
+			if (todo) {
+				todo.order = activeTodoElements.length + index;
+			}
+		});
+		
+		// Save updated order
+		saveTodos();
+	}
+
 	// Initialize app
 	loadTodos();
 	renderTodos();
+	initializeSortable();
 	
 	// Add sample todos if no todos exist (for demonstration)
 	if (todos.length === 0) {
@@ -245,7 +335,8 @@ import DevFooter from '../components/DevFooter.astro';
 			"Welcome to Tachado! ✨",
 			"Add your first todo above",
 			"Click the checkbox to complete items",
-			"Completed items move to the bottom"
+			"Completed items move to the bottom",
+			"Drag items to reorder them"
 		];
 		
 		sampleTodos.forEach((text, index) => {
@@ -255,5 +346,5 @@ import DevFooter from '../components/DevFooter.astro';
 		});
 	}
 	
-	console.log('Tachado Phase 2: Core Todo UI initialized with smooth animations');
+	console.log('Tachado Phase 3: Drag and Drop functionality initialized');
 </script>
