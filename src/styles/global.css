@@ -207,17 +207,7 @@
   @keyframes floaty { 0% { transform: translateY(0); } 50% { transform: translateY(-2px); } 100% { transform: translateY(0); } }
   .floaty { animation: floaty 3s ease-in-out infinite; }
 
-  /* Pull-to-refresh indicator */
-  .ptr-container { @apply relative overflow-hidden; }
-  .ptr-indicator { @apply absolute left-1/2 -translate-x-1/2 top-0 mt-[-36px] flex items-center gap-2 text-xs text-gray-600 opacity-0 transition-all duration-200; }
-  .ptr-indicator.show { @apply opacity-100 mt-2; }
-  .ptr-arrow { @apply inline-block transition-transform duration-200; }
-  .spinner {
-    width: 16px; height: 16px; border-radius: 9999px;
-    border: 2px solid rgba(0,0,0,.15); border-top-color: #2563eb;
-    animation: spin .8s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+
 }
 
 /* iOS-like swipe-to-delete visuals */

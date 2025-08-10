@@ -15,10 +15,7 @@ import DevFooter from '../components/DevFooter.astro';
 			</div>
 		</header>
 
-		<!-- Pull-to-refresh indicator -->
-		<div id="ptr" class="ptr-indicator" aria-hidden="true">
-			<span id="ptrArrow" class="ptr-arrow">⬇️</span><span id="ptrText">Pull to refresh</span>
-		</div>
+
 
 		<!-- Live region for assistive tech announcements -->
 		<div class="sr-only" aria-live="polite" id="a11yAnnouncer"></div>
@@ -77,9 +74,7 @@ import DevFooter from '../components/DevFooter.astro';
 	const shareLinkInput = document.getElementById('shareLinkInput') as HTMLInputElement;
 	const announcer = document.getElementById('a11yAnnouncer') as HTMLDivElement;
 	const toast = document.getElementById('toast') as HTMLDivElement;
-	const ptr = document.getElementById('ptr') as HTMLDivElement;
-	const ptrArrow = document.getElementById('ptrArrow') as HTMLSpanElement;
-	const ptrText = document.getElementById('ptrText') as HTMLSpanElement;
+
 
 	function showToast(message: string) { if (!toast) return; toast.textContent = message; toast.style.opacity = '1'; setTimeout(() => { toast.style.opacity = '0'; }, 1400); }
 	function vibrate(ms: number) { if ('vibrate' in navigator) try { (navigator as any).vibrate(ms); } catch {} }
@@ -236,38 +231,7 @@ import DevFooter from '../components/DevFooter.astro';
 		});
 	}
 
-	// Pull-to-refresh (native-like)
-	let startY = 0; let pulling = false; let locked = false;
-	const THRESHOLD = 64; // px to trigger
-	window.addEventListener('touchstart', (e) => {
-		if (locked) return;
-		if (window.scrollY === 0) { startY = e.touches[0].clientY; pulling = true; if (ptr) { ptr.classList.add('show'); ptrText.textContent = 'Pull to refresh'; } }
-	});
-	window.addEventListener('touchmove', (e) => {
-		if (!pulling || locked) return;
-		const dy = Math.max(0, e.touches[0].clientY - startY);
-		if (!ptr) return;
-		const progress = Math.min(1, dy / THRESHOLD);
-		ptr.style.transform = `translateY(${progress * 16}px)`;
-		if (ptrArrow) ptrArrow.style.transform = `rotate(${progress * 180}deg)`;
-		ptrText.textContent = progress >= 1 ? 'Release to refresh' : 'Pull to refresh';
-	});
-	window.addEventListener('touchend', async () => {
-		if (!pulling || locked) return; pulling = false;
-		if (!ptr) return;
-		const triggered = parseFloat((ptr.style.transform.match(/translateY\((.*?)px\)/)?.[1] || '0')) >= 16;
-		ptr.style.transform = '';
-		ptr.classList.remove('show');
-		if (triggered) {
-			locked = true; vibrate(12); showToast('Refreshing…');
-			try {
-				const remoteTodos = await loadTodosFromFirebase(sessionId);
-				if (remoteTodos && remoteTodos.length) { todos = remoteTodos.map(t => ({ ...t, createdAt: t.createdAt ?? Date.now() })); renderTodos(); }
-				showToast('Refreshed');
-			} catch { showToast('Refresh failed'); }
-			finally { locked = false; }
-		}
-	});
+
 
 	(async function init() {
 		sessionId = getOrCreateSessionId();
@@ -279,5 +243,5 @@ import DevFooter from '../components/DevFooter.astro';
 		cleanupRealtime = setupTodosRealtimeListener(sessionId, (remoteTodos) => { todos = Array.isArray(remoteTodos) ? remoteTodos : remoteTodos || []; renderTodos(); });
 	})();
 
-	console.log('Tachado Phase 4/6: Mobile gestures & haptics enabled');
+	console.log('Tachado Phase 4/6: Firebase sync enabled, pull-to-refresh removed');
 </script>
