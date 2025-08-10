@@ -4,24 +4,38 @@ import DevFooter from '../components/DevFooter.astro';
 ---
 
 <Layout title="Tachado - Todo App">
-	<div class="max-w-md mx-auto">
+	<div class="max-w-md mx-auto touch-pan-y">
 		<!-- Header -->
-		<header class="text-center mb-8">
-			<h1 class="text-3xl font-bold text-gray-800 mb-2">Tachado</h1>
-			<p class="text-gray-600">Simple, smooth todo lists</p>
+		<header class="mb-3 md:mb-4">
+			<div class="flex items-center justify-between">
+				<div>
+					<h1 class="title">Tachado</h1>
+					<p class="text-gray-700 text-sm">Simple, smooth todo lists</p>
+				</div>
+			</div>
 		</header>
 
+		<!-- Pull-to-refresh indicator -->
+		<div id="ptr" class="ptr-indicator" aria-hidden="true">
+			<span id="ptrArrow" class="ptr-arrow">⬇️</span><span id="ptrText">Pull to refresh</span>
+		</div>
+
+		<!-- Live region for assistive tech announcements -->
+		<div class="sr-only" aria-live="polite" id="a11yAnnouncer"></div>
+		<!-- Toast -->
+		<div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-20 z-50 px-3 py-2 rounded-xl bg-black/80 text-white text-xs opacity-0 pointer-events-none transition-opacity"></div>
+
 		<!-- Todo Input -->
-		<div class="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-6 mb-6">
-			<div class="flex items-center space-x-3">
+		<div class="card card-hover p-4 md:p-6 mb-6">
+			<div class="flex items-center gap-3">
 				<input 
 					type="text" 
 					placeholder="Add a new todo..." 
-					class="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+					class="input"
 					id="todoInput"
 				>
 				<button 
-					class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+					class="btn-primary"
 					id="addTodoBtn"
 				>
 					Add
@@ -30,18 +44,18 @@ import DevFooter from '../components/DevFooter.astro';
 		</div>
 
 		<!-- Active Todos -->
-		<div class="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-6 mb-6">
+		<div class="card card-hover p-4 md:p-6 mb-6">
 			<h2 class="text-lg font-semibold text-gray-800 mb-4">Active Todos</h2>
 			<div id="activeTodos" class="space-y-3">
-				<!-- Todo items will be added here dynamically -->
+				<div id="activeSkeleton" class="skeleton h-12"></div>
 			</div>
 		</div>
 
 		<!-- Completed Todos -->
-		<div class="bg-white/60 backdrop-blur-sm rounded-lg shadow-lg p-6">
-			<h2 class="text-lg font-semibold text-gray-600 mb-4">Completed</h2>
+		<div class="card card-hover p-4 md:p-6">
+			<h2 class="text-lg font-semibold text-gray-700 mb-4">Completed</h2>
 			<div id="completedTodos" class="space-y-3">
-				<!-- Completed items will be moved here -->
+				<div id="completedSkeleton" class="skeleton h-10 w-1/2"></div>
 			</div>
 		</div>
 	</div>
@@ -51,59 +65,54 @@ import DevFooter from '../components/DevFooter.astro';
 </Layout>
 
 <script>
-	// Phase 3: Drag and Drop Implementation
-	// This script handles todo creation, completion, smooth animations, and drag-and-drop reordering
+	import { getOrCreateSessionId, updateUrlWithSession, generateShareableUrl, isValidSessionId } from '../lib/sessionManager.js';
+	import { scheduleSaveTodos, loadTodosFromFirebase, setupTodosRealtimeListener } from '../lib/firebaseDataManager.js';
 	
-	// SortableJS will be loaded from CDN
-
-	// Get DOM elements
 	const todoInput = document.getElementById('todoInput') as HTMLInputElement;
 	const addTodoBtn = document.getElementById('addTodoBtn') as HTMLButtonElement;
 	const activeTodos = document.getElementById('activeTodos') as HTMLDivElement;
 	const completedTodos = document.getElementById('completedTodos') as HTMLDivElement;
+	const shareBtn = document.getElementById('shareBtn') as HTMLButtonElement;
+	const sessionLabelFooter = document.getElementById('sessionLabelFooter') as HTMLSpanElement;
+	const shareLinkInput = document.getElementById('shareLinkInput') as HTMLInputElement;
+	const announcer = document.getElementById('a11yAnnouncer') as HTMLDivElement;
+	const toast = document.getElementById('toast') as HTMLDivElement;
+	const ptr = document.getElementById('ptr') as HTMLDivElement;
+	const ptrArrow = document.getElementById('ptrArrow') as HTMLSpanElement;
+	const ptrText = document.getElementById('ptrText') as HTMLSpanElement;
 
-	// Todo data structure
+	function showToast(message: string) { if (!toast) return; toast.textContent = message; toast.style.opacity = '1'; setTimeout(() => { toast.style.opacity = '0'; }, 1400); }
+	function vibrate(ms: number) { if ('vibrate' in navigator) try { (navigator as any).vibrate(ms); } catch {} }
+	function announce(msg: string) { if (announcer) announcer.textContent = msg; }
+
 	let todos: TodoItem[] = [];
+	let sessionId: string = '';
+	let cleanupRealtime: Function | null = null;
 
-	// Todo item interface
-	interface TodoItem {
-		id: string;
-		text: string;
-		completed: boolean;
-		createdAt: Date;
-		order: number;
-	}
+	interface TodoItem { id: string; text: string; completed: boolean; createdAt: Date | number; order: number; }
 
-	// Generate unique ID for todo items
-	function generateId(): string {
-		return Date.now().toString(36) + Math.random().toString(36).substr(2);
-	}
+	function setSession(id: string) { sessionId = id; updateUrlWithSession(sessionId); if (sessionLabelFooter) sessionLabelFooter.textContent = sessionId; }
+	function ensureSessionId() { if (!isValidSessionId(sessionId)) { setSession(getOrCreateSessionId()); } }
+	function updateShareLinkPreview() { if (shareLinkInput) shareLinkInput.value = generateShareableUrl(sessionId); }
+	function generateId(): string { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
 
-	// Create a new todo item element
 	function createTodoElement(todo: TodoItem): HTMLElement {
+		// Base card element
 		const todoElement = document.createElement('div');
-		todoElement.className = 'todo-item bg-white/60 backdrop-blur-sm rounded-lg p-4 shadow-sm border border-gray-100 transition-all duration-300 ease-in-out transform hover:scale-[1.01] hover:shadow-md';
+		todoElement.className = 'todo-item card p-4 animate-pop border border-white/40 relative';
 		todoElement.dataset.todoId = todo.id;
-
-		// Create checkbox
 		const checkbox = document.createElement('input');
 		checkbox.type = 'checkbox';
-		checkbox.className = 'w-6 h-6 text-blue-500 border-gray-300 rounded focus:ring-blue-500 mr-4 flex-shrink-0';
-		checkbox.checked = todo.completed;
+		checkbox.className = 'checkbox mr-4 flex-shrink-0';
+		checkbox.checked = !!todo.completed;
 		checkbox.addEventListener('change', () => toggleTodo(todo.id));
-
-		// Create text span with smooth strike-through animation
 		const textSpan = document.createElement('span');
-		textSpan.className = `todo-text transition-all duration-300 ease-in-out ${todo.completed ? 'line-through text-gray-500' : 'text-gray-800'}`;
+		textSpan.className = `todo-text ${todo.completed ? 'line-through text-gray-500' : 'text-gray-800'}`;
 		textSpan.textContent = todo.text;
-
-					// Create container for checkbox and text
 		const contentContainer = document.createElement('div');
 		contentContainer.className = 'flex items-center w-full';
 		contentContainer.appendChild(checkbox);
 		contentContainer.appendChild(textSpan);
-		
-		// Add subtle drag indicator
 		const dragIndicator = document.createElement('div');
 		dragIndicator.className = 'ml-auto opacity-30 hover:opacity-60 transition-opacity duration-200';
 		dragIndicator.innerHTML = '⋮⋮';
@@ -111,255 +120,164 @@ import DevFooter from '../components/DevFooter.astro';
 		dragIndicator.style.fontWeight = 'bold';
 		dragIndicator.style.color = '#6B7280';
 		contentContainer.appendChild(dragIndicator);
-		
-		// Assemble todo item
 		todoElement.appendChild(contentContainer);
 
+		// Only completed items get swipe-to-delete wrapper + visuals
+		if (todo.completed) {
+			const wrapper = document.createElement('div');
+			wrapper.className = 'swipe-container';
+			const bg = document.createElement('div');
+			bg.className = 'swipe-bg';
+			const iconLeft = document.createElement('div'); iconLeft.className = 'swipe-icon left'; iconLeft.textContent = '🗑️';
+			const iconRight = document.createElement('div'); iconRight.className = 'swipe-icon right'; iconRight.textContent = '🗑️';
+			bg.appendChild(iconLeft); bg.appendChild(iconRight);
+			wrapper.appendChild(bg);
+			wrapper.appendChild(todoElement);
+			attachSwipeToDelete(wrapper, todoElement, iconLeft, iconRight, todo.id);
+			return wrapper;
+		}
+
+		// Active items: plain card
 		return todoElement;
 	}
 
-	// Add a new todo
-	function addTodo(text: string) {
-		if (!text.trim()) return;
-
-		const newTodo: TodoItem = {
-			id: generateId(),
-			text: text.trim(),
-			completed: false,
-			createdAt: new Date(),
-			order: todos.length
-		};
-
-		todos.push(newTodo);
-		
-		// Create and add todo element with smooth entrance animation
-		const todoElement = createTodoElement(newTodo);
-		todoElement.style.opacity = '0';
-		todoElement.style.transform = 'translateY(-10px)';
-		
-		activeTodos.appendChild(todoElement);
-		
-		// Trigger entrance animation
-		requestAnimationFrame(() => {
-			todoElement.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out';
-			todoElement.style.opacity = '1';
-			todoElement.style.transform = 'translateY(0)';
+	function attachSwipeToDelete(wrapper: HTMLElement, el: HTMLElement, iconLeft: HTMLElement, iconRight: HTMLElement, todoId: string) {
+		let startX = 0; let swiping = false; let dx = 0;
+		const THRESH = 64; // px threshold
+		wrapper.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; swiping = true; dx = 0; });
+		wrapper.addEventListener('touchmove', (e) => {
+			if (!swiping) return;
+			dx = e.touches[0].clientX - startX;
+			el.style.transform = `translateX(${dx}px)`;
+			const alpha = Math.min(1, Math.abs(dx) / 120);
+			iconLeft.style.opacity = dx > 0 ? String(alpha) : '0';
+			iconRight.style.opacity = dx < 0 ? String(alpha) : '0';
 		});
-
-		// Clear input
-		todoInput.value = '';
-		
-		// Save to localStorage
-		saveTodos();
+		wrapper.addEventListener('touchend', () => {
+			swiping = false;
+			if (Math.abs(dx) > THRESH) {
+				el.style.transition = 'transform .2s ease, opacity .2s ease';
+				el.style.transform = `translateX(${dx > 0 ? 200 : -200}px)`;
+				el.style.opacity = '0';
+				setTimeout(() => { performDeleteCompleted(todoId); }, 180);
+				vibrate(12); showToast('Item deleted');
+			} else {
+				el.style.transition = 'transform .2s ease, opacity .2s ease';
+				el.style.transform = 'translateX(0)'; el.style.opacity = '1';
+				iconLeft.style.opacity = '0'; iconRight.style.opacity = '0';
+			}
+		});
 	}
 
-	// Toggle todo completion with smooth animations
+	function performDeleteCompleted(todoId: string) {
+		const tIndex = todos.findIndex(t => t.id === todoId);
+		if (tIndex === -1) return;
+		if (!todos[tIndex].completed) return; // only delete completed
+		todos.splice(tIndex, 1);
+		renderTodos();
+		scheduleSaveTodos(sessionId, todos);
+	}
+
+	function addTodo(text: string) {
+		if (!text.trim()) return;
+		const newTodo: TodoItem = { id: generateId(), text: text.trim(), completed: false, createdAt: Date.now(), order: todos.length };
+		todos.push(newTodo);
+		renderTodos();
+		scheduleSaveTodos(sessionId, todos);
+		announce('Todo added');
+		vibrate(10);
+		todoInput.value = '';
+	}
 	function toggleTodo(todoId: string) {
 		const todo = todos.find(t => t.id === todoId);
 		if (!todo) return;
-
 		todo.completed = !todo.completed;
-		
-		// Find the todo element
-		const todoElement = document.querySelector(`[data-todo-id="${todoId}"]`) as HTMLElement;
-		if (!todoElement) return;
-
-		// Get the text span for strike-through animation
-		const textSpan = todoElement.querySelector('.todo-text') as HTMLElement;
-		const checkbox = todoElement.querySelector('input[type="checkbox"]') as HTMLInputElement;
-
-		if (todo.completed) {
-			// Animate to completed section
-			textSpan.style.transition = 'text-decoration 0.3s ease-out, color 0.3s ease-out';
-			textSpan.classList.add('line-through', 'text-gray-500');
-			
-			// Move to completed section with smooth animation
-			setTimeout(() => {
-				completedTodos.appendChild(todoElement);
-				todoElement.style.transition = 'all 0.4s ease-in-out';
-				todoElement.style.transform = 'scale(0.98)';
-				todoElement.style.opacity = '0.8';
-				// Update order after moving
-				updateTodoOrder();
-			}, 150);
-		} else {
-			// Animate back to active section
-			textSpan.style.transition = 'text-decoration 0.3s ease-out, color 0.3s ease-out';
-			textSpan.classList.remove('line-through', 'text-gray-500');
-			
-			// Move back to active section with smooth animation
-			setTimeout(() => {
-				activeTodos.appendChild(todoElement);
-				todoElement.style.transition = 'all 0.4s ease-in-out';
-				todoElement.style.transform = 'scale(1)';
-				todoElement.style.opacity = '1';
-				// Update order after moving
-				updateTodoOrder();
-			}, 150);
-		}
-
-		// Save to localStorage
-		saveTodos();
+		renderTodos();
+		scheduleSaveTodos(sessionId, todos);
+		announce('Todo updated');
+		vibrate(8);
 	}
 
-
-
-	// Save todos to localStorage
-	function saveTodos() {
-		localStorage.setItem('tachado-todos', JSON.stringify(todos));
+	function initializeSortable() {
+		const SortableLib = (window as any).Sortable;
+		if (!SortableLib) return;
+		new SortableLib(activeTodos, { group: 'todos', animation: 200, ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen', dragClass: 'sortable-drag', delay: 150, delayOnTouchOnly: true, touchStartThreshold: 5, onEnd: () => { updateTodoOrder(); vibrate(6); } });
+		new SortableLib(completedTodos, { group: 'todos', animation: 200, ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen', dragClass: 'sortable-drag', delay: 150, delayOnTouchOnly: true, touchStartThreshold: 5, onEnd: () => { updateTodoOrder(); vibrate(6); } });
 	}
 
-	// Load todos from localStorage
-	function loadTodos() {
-		const saved = localStorage.getItem('tachado-todos');
-		if (saved) {
-			try {
-				todos = JSON.parse(saved);
-				// Restore date objects
-				todos.forEach(todo => {
-					todo.createdAt = new Date(todo.createdAt);
-				});
-			} catch (error) {
-				console.error('Error loading todos:', error);
-				todos = [];
-			}
-		}
-	}
-
-	// Render all todos
 	function renderTodos() {
-		// Clear containers
 		activeTodos.innerHTML = '';
 		completedTodos.innerHTML = '';
-
-		// Sort todos by order
 		const sortedTodos = [...todos].sort((a, b) => (a.order || 0) - (b.order || 0));
-
-		// Render each todo in appropriate section
 		sortedTodos.forEach(todo => {
-			const todoElement = createTodoElement(todo);
-			if (todo.completed) {
-				completedTodos.appendChild(todoElement);
-			} else {
-				activeTodos.appendChild(todoElement);
-			}
+			const el = createTodoElement(todo);
+			if (todo.completed) completedTodos.appendChild(el); else activeTodos.appendChild(el);
+		});
+		const sk1 = document.getElementById('activeSkeleton'); const sk2 = document.getElementById('completedSkeleton'); if (sk1) sk1.remove(); if (sk2) sk2.remove();
+		initializeSortable();
+	}
+	function updateTodoOrder() {
+		const activeEls = activeTodos.querySelectorAll('.todo-item');
+		const completedEls = completedTodos.querySelectorAll('.todo-item');
+		activeEls.forEach((el, idx) => { const t = todos.find(x => x.id === (el as HTMLElement).dataset.todoId); if (t) t.order = idx; });
+		completedEls.forEach((el, idx) => { const t = todos.find(x => x.id === (el as HTMLElement).dataset.todoId); if (t) t.order = activeEls.length + idx; });
+		scheduleSaveTodos(sessionId, todos);
+		announce('Order updated');
+	}
+	function updateSessionLabel() { if (sessionLabelFooter) sessionLabelFooter.textContent = sessionId; }
+
+	addTodoBtn.addEventListener('click', () => addTodo(todoInput.value));
+	todoInput.addEventListener('keydown', (e) => { if ((e as KeyboardEvent).key === 'Enter') addTodo(todoInput.value); });
+
+	if (shareBtn) {
+		shareBtn.addEventListener('click', async () => {
+			try { ensureSessionId(); const url = generateShareableUrl(sessionId); if (shareLinkInput) shareLinkInput.value = url; await navigator.clipboard.writeText(url); showToast('Link copied to clipboard'); }
+			catch { showToast('Copy failed. Tap and hold to select link.'); }
 		});
 	}
 
-	// Event listeners
-	addTodoBtn.addEventListener('click', () => addTodo(todoInput.value));
-	
-	todoInput.addEventListener('keypress', (e) => {
-		if (e.key === 'Enter') {
-			addTodo(todoInput.value);
+	// Pull-to-refresh (native-like)
+	let startY = 0; let pulling = false; let locked = false;
+	const THRESHOLD = 64; // px to trigger
+	window.addEventListener('touchstart', (e) => {
+		if (locked) return;
+		if (window.scrollY === 0) { startY = e.touches[0].clientY; pulling = true; if (ptr) { ptr.classList.add('show'); ptrText.textContent = 'Pull to refresh'; } }
+	});
+	window.addEventListener('touchmove', (e) => {
+		if (!pulling || locked) return;
+		const dy = Math.max(0, e.touches[0].clientY - startY);
+		if (!ptr) return;
+		const progress = Math.min(1, dy / THRESHOLD);
+		ptr.style.transform = `translateY(${progress * 16}px)`;
+		if (ptrArrow) ptrArrow.style.transform = `rotate(${progress * 180}deg)`;
+		ptrText.textContent = progress >= 1 ? 'Release to refresh' : 'Pull to refresh';
+	});
+	window.addEventListener('touchend', async () => {
+		if (!pulling || locked) return; pulling = false;
+		if (!ptr) return;
+		const triggered = parseFloat((ptr.style.transform.match(/translateY\((.*?)px\)/)?.[1] || '0')) >= 16;
+		ptr.style.transform = '';
+		ptr.classList.remove('show');
+		if (triggered) {
+			locked = true; vibrate(12); showToast('Refreshing…');
+			try {
+				const remoteTodos = await loadTodosFromFirebase(sessionId);
+				if (remoteTodos && remoteTodos.length) { todos = remoteTodos.map(t => ({ ...t, createdAt: t.createdAt ?? Date.now() })); renderTodos(); }
+				showToast('Refreshed');
+			} catch { showToast('Refresh failed'); }
+			finally { locked = false; }
 		}
 	});
 
-	// Initialize drag-and-drop functionality
-	function initializeSortable() {
-		// Initialize SortableJS for active todos
-		new Sortable(activeTodos, {
-			group: 'todos',
-			animation: 300,
-			ghostClass: 'sortable-ghost',
-			chosenClass: 'sortable-chosen',
-			dragClass: 'sortable-drag',
-			delay: 150, // Prevent accidental drags
-			delayOnTouchOnly: true, // Only delay on touch devices
-			touchStartThreshold: 5, // Minimum distance to start drag
-			onStart: function(evt) {
-				// Add haptic feedback for mobile devices
-				if ('vibrate' in navigator) {
-					navigator.vibrate(50);
-				}
-				evt.item.style.opacity = '0.8';
-				evt.item.style.transform = 'rotate(1deg)';
-			},
-			onEnd: function(evt) {
-				evt.item.style.opacity = '1';
-				evt.item.style.transform = 'rotate(0deg)';
-				
-				// Update todo order in data
-				updateTodoOrder();
-			}
-		});
+	(async function init() {
+		sessionId = getOrCreateSessionId();
+		updateSessionLabel();
+		updateShareLinkPreview();
+		try { const remoteTodos = await loadTodosFromFirebase(sessionId); if (remoteTodos && remoteTodos.length) { todos = remoteTodos.map(t => ({ ...t, createdAt: t.createdAt ?? Date.now() })); } else { const saved = localStorage.getItem('tachado-todos'); if (saved) todos = JSON.parse(saved); } }
+		catch { const saved = localStorage.getItem('tachado-todos'); if (saved) todos = JSON.parse(saved); }
+		renderTodos();
+		cleanupRealtime = setupTodosRealtimeListener(sessionId, (remoteTodos) => { todos = Array.isArray(remoteTodos) ? remoteTodos : remoteTodos || []; renderTodos(); });
+	})();
 
-		// Initialize SortableJS for completed todos
-		new Sortable(completedTodos, {
-			group: 'todos',
-			animation: 300,
-			ghostClass: 'sortable-ghost',
-			chosenClass: 'sortable-chosen',
-			dragClass: 'sortable-drag',
-			delay: 150, // Prevent accidental drags
-			delayOnTouchOnly: true, // Only delay on touch devices
-			touchStartThreshold: 5, // Minimum distance to start drag
-			onStart: function(evt) {
-				// Add haptic feedback for mobile devices
-				if ('vibrate' in navigator) {
-					navigator.vibrate(50);
-				}
-				evt.item.style.opacity = '0.8';
-				evt.item.style.transform = 'rotate(1deg)';
-			},
-			onEnd: function(evt) {
-				evt.item.style.opacity = '1';
-				evt.item.style.transform = 'rotate(0deg)';
-				
-				// Update todo order in data
-				updateTodoOrder();
-			}
-		});
-	}
-
-	// Update todo order based on current DOM order
-	function updateTodoOrder() {
-		const activeTodoElements = activeTodos.querySelectorAll('.todo-item');
-		const completedTodoElements = completedTodos.querySelectorAll('.todo-item');
-		
-		// Update active todos order
-		activeTodoElements.forEach((element, index) => {
-			const todoId = element.dataset.todoId;
-			const todo = todos.find(t => t.id === todoId);
-			if (todo) {
-				todo.order = index;
-			}
-		});
-		
-		// Update completed todos order
-		completedTodoElements.forEach((element, index) => {
-			const todoId = element.dataset.todoId;
-			const todo = todos.find(t => t.id === todoId);
-			if (todo) {
-				todo.order = activeTodoElements.length + index;
-			}
-		});
-		
-		// Save updated order
-		saveTodos();
-	}
-
-	// Initialize app
-	loadTodos();
-	renderTodos();
-	initializeSortable();
-	
-	// Add sample todos if no todos exist (for demonstration)
-	if (todos.length === 0) {
-		const sampleTodos = [
-			"Welcome to Tachado! ✨",
-			"Add your first todo above",
-			"Click the checkbox to complete items",
-			"Completed items move to the bottom",
-			"Drag items to reorder them"
-		];
-		
-		sampleTodos.forEach((text, index) => {
-			setTimeout(() => {
-				addTodo(text);
-			}, index * 200); // Stagger the additions for a nice effect
-		});
-	}
-	
-	console.log('Tachado Phase 3: Drag and Drop functionality initialized');
+	console.log('Tachado Phase 4/6: Mobile gestures & haptics enabled');
 </script>

@@ -1,0 +1,13 @@
+{
+  "name": "Tachado",
+  "short_name": "Tachado",
+  "description": "Simple, smooth todo lists",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

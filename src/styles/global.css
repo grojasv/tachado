@@ -1,6 +1,43 @@
 @import "tailwindcss";
 
 /* Enhanced animations for Tachado todo app */
+@layer base {
+  html {
+    @apply antialiased;
+  }
+  body {
+    @apply text-gray-800;
+  }
+  /* Screen-reader only utility */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+  /* Better keyboard focus */
+  :focus-visible {
+    @apply outline-none ring-2 ring-blue-500 ring-offset-2 ring-offset-white;
+  }
+  /* Touch behavior */
+  .touch-pan-y {
+    touch-action: pan-y;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* App background helper for light/dark */
+  .app-bg {
+    @apply min-h-screen bg-gradient-to-br from-blue-50 to-pink-50 dark:from-zinc-900 dark:to-slate-900;
+  }
+  .dark body {
+    @apply text-gray-100;
+  }
+}
+
 @layer components {
   /* Smooth transitions for todo items */
   .todo-item {
@@ -9,7 +46,7 @@
 
   /* Enhanced hover effects */
   .todo-item:hover {
-    @apply transform scale-[1.02] shadow-md;
+    @apply transform scale-[1.01] shadow-md;
   }
 
   /* Smooth strike-through animation */
@@ -26,19 +63,32 @@
     @apply transform scale-110;
   }
 
-  /* Smooth button transitions */
+  /* Smooth button transitions + press feedback */
   button {
-    @apply transition-all duration-200 ease-in-out;
+    @apply transition-all duration-150 ease-out active:scale-[0.98];
   }
 
   /* Enhanced input focus states */
   input:focus {
-    @apply transform scale-[1.01];
+    @apply transform scale-[1.005];
   }
 
-  /* Glass morphism enhancement */
+  /* Glass morphism helper */
   .glass-effect {
     @apply bg-white/80 backdrop-blur-sm;
+  }
+
+  /* Consistent glass card */
+  .glass-card {
+    @apply rounded-xl border border-white/20 bg-white/70 backdrop-blur-md shadow-lg dark:bg-zinc-900/60 dark:border-white/10;
+  }
+
+  /* Inputs/buttons in dark */
+  .dark input {
+    @apply bg-zinc-800 border-zinc-700 text-gray-100 placeholder-gray-400;
+  }
+  .dark button {
+    @apply bg-zinc-800 text-gray-100 border-zinc-700;
   }
 
   /* Mobile-first touch targets */
@@ -89,4 +139,92 @@
   .todo-item.sortable-ghost {
     @apply border-dashed;
   }
+
+  /* Skeleton loading */
+  @keyframes skeleton-pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+  }
+  .skeleton {
+    @apply bg-gray-200 rounded-lg;
+    animation: skeleton-pulse 1.2s ease-in-out infinite;
+  }
+
+  /* --- Modern playful design system additions --- */
+
+  /* Fun gradient background with subtle radial glow */
+  .app-bg-fun {
+    min-height: 100vh;
+    background:
+      radial-gradient(1200px 600px at -10% -10%, rgba(255, 200, 255, 0.25), transparent 60%),
+      radial-gradient(800px 400px at 110% 10%, rgba(173, 216, 230, 0.25), transparent 60%),
+      linear-gradient(135deg, #fafcff 0%, #f3f7ff 40%, #fef6ff 100%);
+  }
+
+  /* Cards */
+  .card {
+    @apply rounded-2xl border border-white/40 bg-white/80 backdrop-blur-md shadow-lg;
+  }
+  .card-hover {
+    @apply transition-transform duration-200 ease-out hover:translate-y-[-2px] hover:shadow-xl;
+  }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center rounded-xl font-medium transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-xl font-medium transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 px-5 py-3 text-white bg-gradient-to-br from-fuchsia-500 to-sky-500 shadow-md hover:brightness-110 focus:ring-fuchsia-400;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center rounded-xl font-medium transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 px-4 py-2 bg-white/70 text-gray-800 border border-gray-200 hover:bg-white;
+  }
+
+  /* Inputs */
+  .input {
+    @apply w-full px-4 py-3 rounded-xl border border-gray-200 bg-white/80 backdrop-blur-sm placeholder:text-gray-400 focus:ring-2 focus:ring-blue-600 focus:border-transparent;
+  }
+
+  /* Checkbox */
+  .checkbox {
+    @apply w-6 h-6 rounded-md border border-gray-300 text-blue-600 focus:ring-blue-600 transition-transform duration-150;
+  }
+  .checkbox:checked { @apply scale-110; }
+
+  /* Titles */
+  .title { @apply text-3xl font-extrabold tracking-tight text-gray-800; }
+  .subtitle { @apply text-sm text-gray-600; }
+
+  /* Micro animations */
+  @keyframes pop {
+    0% { transform: scale(0.96); opacity: 0; }
+    60% { transform: scale(1.02); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+  .animate-pop { animation: pop .25s ease-out both; }
+
+  @keyframes floaty { 0% { transform: translateY(0); } 50% { transform: translateY(-2px); } 100% { transform: translateY(0); } }
+  .floaty { animation: floaty 3s ease-in-out infinite; }
+
+  /* Pull-to-refresh indicator */
+  .ptr-container { @apply relative overflow-hidden; }
+  .ptr-indicator { @apply absolute left-1/2 -translate-x-1/2 top-0 mt-[-36px] flex items-center gap-2 text-xs text-gray-600 opacity-0 transition-all duration-200; }
+  .ptr-indicator.show { @apply opacity-100 mt-2; }
+  .ptr-arrow { @apply inline-block transition-transform duration-200; }
+  .spinner {
+    width: 16px; height: 16px; border-radius: 9999px;
+    border: 2px solid rgba(0,0,0,.15); border-top-color: #2563eb;
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+}
+
+/* iOS-like swipe-to-delete visuals */
+@layer components {
+  .swipe-container { @apply relative overflow-hidden rounded-2xl; }
+  .swipe-bg { @apply absolute inset-0 rounded-2xl pointer-events-none; background: linear-gradient(90deg, rgba(239,68,68,0.9) 0%, rgba(244,63,94,0.9) 100%); }
+  .swipe-icon { @apply absolute top-1/2 -translate-y-1/2 text-white text-sm font-semibold opacity-0 transition-opacity; }
+  .swipe-icon.left { @apply left-3; }
+  .swipe-icon.right { @apply right-3; }
 }

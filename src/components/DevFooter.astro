@@ -6,33 +6,51 @@ let commitInfo = {
 	message: 'Development build'
 };
 
-// Try to get git commit info if available
 try {
 	const { execSync } = await import('child_process');
 	const gitHash = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
 	const gitDate = execSync('git log -1 --format=%cd --date=iso', { encoding: 'utf8' }).trim();
 	const gitMessage = execSync('git log -1 --format=%s', { encoding: 'utf8' }).trim();
-	
-	commitInfo = {
-		hash: gitHash,
-		date: gitDate,
-		message: gitMessage
-	};
-} catch (error) {
-	// Fallback to development info if git is not available
-	console.log('Git information not available, using development info');
-}
+	commitInfo = { hash: gitHash, date: gitDate, message: gitMessage };
+} catch {}
 ---
 
-<!-- Development Footer - Shows latest commit info -->
-<footer class="fixed bottom-0 left-0 right-0 bg-black/10 backdrop-blur-sm border-t border-white/20 text-xs text-gray-600 p-2 text-center">
-	<div class="flex items-center justify-center space-x-2">
-		<span class="font-mono">Tachado</span>
-		<span>•</span>
-		<span class="font-mono">{commitInfo.hash}</span>
-		<span>•</span>
-		<span>{new Date(commitInfo.date).toLocaleDateString()}</span>
-		<span>•</span>
-		<span class="truncate max-w-32">{commitInfo.message}</span>
+<!-- Footer (non-sticky) with two rows: sharing + development info -->
+<footer class="mt-10 bg-white/80 backdrop-blur-md text-xs text-gray-700 border-t border-gray-300" style="padding-bottom: env(safe-area-inset-bottom)">
+	<div class="max-w-md mx-auto px-4 py-4 space-y-4">
+		<!-- Row 1: Sharing controls (mobile-first, cohesive) -->
+		<div class="rounded-xl p-3 sm:p-4 bg-white/80 backdrop-blur-md shadow-lg ring-1 ring-fuchsia-300/40">
+			<div class="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
+				<span class="text-base">🔗</span>
+				<span>Share this list</span>
+			</div>
+			<div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+				<input 
+					id="shareLinkInput" 
+					class="input text-xs sm:text-sm" 
+					type="text" 
+					placeholder="Share link will appear here" 
+					readonly 
+					aria-describedby="shareHelp"
+				/>
+				<div class="flex items-center gap-2">
+					<button id="shareBtn" class="btn-primary px-4 py-2 text-xs sm:text-sm" aria-label="Copy share link">Copy link</button>
+					<span id="sessionLabelFooter" class="font-mono text-[10px] sm:text-xs px-2 py-1 rounded-lg bg-gray-100 border border-gray-200 text-gray-700 truncate max-w-[140px]"></span>
+				</div>
+			</div>
+			<p id="shareHelp" class="mt-1 text-[11px] text-gray-600">Anyone with the link can view this list.</p>
+		</div>
+
+		<!-- Row 2: Development info -->
+		<div class="pt-3 border-t border-gray-300 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+			<div class="flex items-center gap-2">
+				<span class="font-mono">Tachado</span>
+				<span>•</span>
+				<span class="font-mono">{commitInfo.hash}</span>
+				<span>•</span>
+				<span>{new Date(commitInfo.date).toLocaleDateString()}</span>
+			</div>
+			<div class="truncate text-gray-600">{commitInfo.message}</div>
+		</div>
 	</div>
 </footer> 
