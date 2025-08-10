@@ -103,6 +103,15 @@ import DevFooter from '../components/DevFooter.astro';
 		contentContainer.appendChild(checkbox);
 		contentContainer.appendChild(textSpan);
 		
+		// Add subtle drag indicator
+		const dragIndicator = document.createElement('div');
+		dragIndicator.className = 'ml-auto opacity-30 hover:opacity-60 transition-opacity duration-200';
+		dragIndicator.innerHTML = '⋮⋮';
+		dragIndicator.style.fontSize = '0.8rem';
+		dragIndicator.style.fontWeight = 'bold';
+		dragIndicator.style.color = '#6B7280';
+		contentContainer.appendChild(dragIndicator);
+		
 		// Assemble todo item
 		todoElement.appendChild(contentContainer);
 
@@ -255,13 +264,16 @@ import DevFooter from '../components/DevFooter.astro';
 			ghostClass: 'sortable-ghost',
 			chosenClass: 'sortable-chosen',
 			dragClass: 'sortable-drag',
+			delay: 150, // Prevent accidental drags
+			delayOnTouchOnly: true, // Only delay on touch devices
+			touchStartThreshold: 5, // Minimum distance to start drag
 			onStart: function(evt) {
 				// Add haptic feedback for mobile devices
 				if ('vibrate' in navigator) {
 					navigator.vibrate(50);
 				}
 				evt.item.style.opacity = '0.8';
-				evt.item.style.transform = 'rotate(2deg)';
+				evt.item.style.transform = 'rotate(1deg)';
 			},
 			onEnd: function(evt) {
 				evt.item.style.opacity = '1';
@@ -279,13 +291,16 @@ import DevFooter from '../components/DevFooter.astro';
 			ghostClass: 'sortable-ghost',
 			chosenClass: 'sortable-chosen',
 			dragClass: 'sortable-drag',
+			delay: 150, // Prevent accidental drags
+			delayOnTouchOnly: true, // Only delay on touch devices
+			touchStartThreshold: 5, // Minimum distance to start drag
 			onStart: function(evt) {
 				// Add haptic feedback for mobile devices
 				if ('vibrate' in navigator) {
 					navigator.vibrate(50);
 				}
 				evt.item.style.opacity = '0.8';
-				evt.item.style.transform = 'rotate(2deg)';
+				evt.item.style.transform = 'rotate(1deg)';
 			},
 			onEnd: function(evt) {
 				evt.item.style.opacity = '1';
