@@ -175,6 +175,7 @@ A mobile-first web application for creating and managing todo lists with smooth 
   - Content Security Policy headers configured
   - Automatic deployments from main branch
   - Production-ready build optimization
+  - **Live URL**: https://tachado.netlify.app
 
 ### **Phase 8: Final Enhancements** 🎁
 **Goal**: Professional finishing touches and shareability
@@ -280,4 +281,4 @@ Each phase is complete when:
 
 ---
 
-**Current Status**: 🎉 All core phases (1-7) completed! Tachado is now a fully functional, production-ready PWA with real-time sync, native-like experience, and live deployment. Ready for Phase 8: Final Enhancements for professional polish. 
+**Current Status**: 🎉 All core phases (1-7) completed! Tachado is now live at https://tachado.netlify.app - a fully functional, production-ready PWA with real-time sync, native-like experience, and automatic deployments. Ready for Phase 8: Final Enhancements for professional polish. 
