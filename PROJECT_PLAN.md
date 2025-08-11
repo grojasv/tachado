@@ -197,7 +197,7 @@ App-like mobile UX (high impact)
 Mobile PWA feel
 - [x] Add to Home Screen hints: Android `beforeinstallprompt`; simple iOS banner with steps
 - [x] Fullscreen feel: `viewport-fit=cover`; apply safe‑area paddings to header; minimize overscroll
-- [ ] Icons/splash: maskable icons 192/512, verify manifest `name`/`short_name`
+- [x] Icons/splash: maskable icons 192/512, verify manifest `name`/`short_name`
 
 Navigation and feedback
 - [x] Coach marks: one‑time tips (arrastra “⋮⋮”, desliza para borrar)
