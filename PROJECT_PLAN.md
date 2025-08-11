@@ -187,31 +187,30 @@ A mobile-first web application for creating and managing todo lists with smooth 
 
 App-like mobile UX (high impact)
 - [x] Theme/status bar polish: set `<meta name="theme-color">` to match background
-- [ ] iOS status bar style: `apple-mobile-web-app-status-bar-style=black-translucent`
+- [x] iOS status bar style: `apple-mobile-web-app-status-bar-style=black-translucent`
 - [x] Web Share API: use native share sheet on mobile; fallback to copy
 - [x] “Deshacer” snackbar: undo after swipe-to-delete (5s)
-- [ ] Input UX: `enterkeyhint="done"`, autofocus on first load, clear-on-add, select-on-focus
-- [ ] Micro‑haptics: softer taps for reorder, stronger for delete; respect reduced motion
-- [ ] Tap targets: ensure 48px minimum on controls and drag handles
+- [x] Input UX: `enterkeyhint="done"`, autofocus on first load, clear-on-add, select-on-focus
+- [x] Micro‑haptics: softer taps for reorder, stronger for delete; respect reduced motion
+- [x] Tap targets: ensure 48px minimum on controls and drag handles
 
 Mobile PWA feel
-- [ ] Add to Home Screen hints: Android `beforeinstallprompt`; simple iOS banner with steps
-- [ ] Fullscreen feel: `viewport-fit=cover`; apply safe‑area paddings to header; minimize overscroll
+- [x] Add to Home Screen hints: Android `beforeinstallprompt`; simple iOS banner with steps
+- [x] Fullscreen feel: `viewport-fit=cover`; apply safe‑area paddings to header; minimize overscroll
 - [ ] Icons/splash: maskable icons 192/512, verify manifest `name`/`short_name`
 
 Navigation and feedback
-- [ ] Coach marks: one‑time tips (arrastra “⋮⋮”, desliza para borrar)
-- [ ] Empty states: friendly messages for “Pendientes” y “Tachados”
-- [ ] Reorder feedback: debounce/suppress repeated “Orden actualizado” toasts
+- [x] Coach marks: one‑time tips (arrastra “⋮⋮”, desliza para borrar)
+- [x] Empty states: friendly messages for “Pendientes” y “Tachados”
+- [x] Reorder feedback: debounce/suppress repeated “Orden actualizado” toasts
 
 Performance polish
 - [ ] Defer SortableJS load until first render/interaction
-- [ ] Preconnect to Firebase domain; consider dns-prefetch
+- [x] Preconnect to Firebase domain; consider dns-prefetch
 - [ ] Inline critical CSS for above‑the‑fold; keep bundle lean
 - [ ] Reduce layout shifts: fixed heights for skeletons; consistent spacing
 
 Accessibility (ES)
-- [ ] Live announcements in español for add/delete/reorder (revisar cobertura)
 - [ ] Stronger focus-visible outlines on interactive elements
 - [ ] Increase contrast for secondary text and dividers where needed
 

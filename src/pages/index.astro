@@ -15,6 +15,31 @@ import DevFooter from '../components/DevFooter.astro';
 			</div>
 		</header>
 
+		<!-- Coach tips (one-time) -->
+		<div id="coachTips" class="card p-3 mb-3 hidden">
+			<div class="flex items-center justify-between">
+				<div class="flex flex-wrap gap-2 text-sm text-gray-700">
+					<span class="px-2 py-1 rounded-lg bg-blue-50 border border-blue-200">Arrastra “⋮⋮” para ordenar</span>
+					<span class="px-2 py-1 rounded-lg bg-pink-50 border border-pink-200">Desliza un tachado para borrar</span>
+				</div>
+				<button id="coachClose" class="btn-ghost text-xs px-2 py-1">Cerrar</button>
+			</div>
+		</div>
+
+		<!-- Install banners -->
+		<div id="installBanner" class="fixed left-1/2 -translate-x-1/2 bottom-6 z-50 hidden">
+			<div class="flex items-center gap-3 px-4 py-2 rounded-xl shadow-lg bg-white/90 border border-gray-200">
+				<span class="text-sm text-gray-800">Instalar Tachado</span>
+				<button id="installBtn" class="btn-primary text-sm px-3 py-1">Instalar</button>
+				<button id="installDismiss" class="btn-ghost text-sm px-3 py-1">Más tarde</button>
+			</div>
+		</div>
+		<div id="iosHint" class="fixed left-1/2 -translate-x-1/2 bottom-6 z-50 hidden">
+			<div class="flex items-center gap-3 px-4 py-2 rounded-xl shadow-lg bg-white/90 border border-gray-200 text-sm text-gray-800">
+				<span>En iPhone: toca Compartir → “Añadir a la pantalla de inicio”</span>
+				<button id="iosDismiss" class="btn-ghost text-xs px-2 py-1">Cerrar</button>
+			</div>
+		</div>
 
 
 		<!-- Live region for assistive tech announcements -->
@@ -90,6 +115,13 @@ import DevFooter from '../components/DevFooter.astro';
 	const toast = document.getElementById('toast') as HTMLDivElement;
 	const undoBar = document.getElementById('undoBar') as HTMLDivElement;
 	const undoBtn = document.getElementById('undoBtn') as HTMLButtonElement;
+	const coachTips = document.getElementById('coachTips') as HTMLDivElement;
+	const coachClose = document.getElementById('coachClose') as HTMLButtonElement;
+	const installBanner = document.getElementById('installBanner') as HTMLDivElement;
+	const installBtn = document.getElementById('installBtn') as HTMLButtonElement;
+	const installDismiss = document.getElementById('installDismiss') as HTMLButtonElement;
+	const iosHint = document.getElementById('iosHint') as HTMLDivElement;
+	const iosDismiss = document.getElementById('iosDismiss') as HTMLButtonElement;
 
 
 	function showToast(message: string) { if (!toast) return; toast.textContent = message; toast.style.opacity = '1'; setTimeout(() => { toast.style.opacity = '0'; }, 1400); }
@@ -106,6 +138,8 @@ import DevFooter from '../components/DevFooter.astro';
 	let cleanupRealtime: Function | null = null;
 	let lastDeleted: { todo: TodoItem; index: number } | null = null;
 	let undoTimer: number | null = null;
+	let deferredPrompt: any = null;
+	let lastOrderAnnounceAt = 0;
 
 	interface TodoItem { id: string; text: string; completed: boolean; createdAt: Date | number; order: number; }
 
@@ -256,7 +290,8 @@ import DevFooter from '../components/DevFooter.astro';
 		activeEls.forEach((el, idx) => { const t = todos.find(x => x.id === (el as HTMLElement).dataset.todoId); if (t) t.order = idx; });
 		completedEls.forEach((el, idx) => { const t = todos.find(x => x.id === (el as HTMLElement).dataset.todoId); if (t) t.order = activeEls.length + idx; });
 		scheduleSaveTodos(sessionId, todos);
-		announce('Orden actualizado');
+		const now = Date.now();
+		if (now - lastOrderAnnounceAt > 1500) { announce('Orden actualizado'); lastOrderAnnounceAt = now; }
 	}
 	function updateSessionLabel() { if (sessionLabelFooter) sessionLabelFooter.textContent = sessionId; }
 
@@ -285,6 +320,45 @@ import DevFooter from '../components/DevFooter.astro';
 			catch { showToast('No se pudo copiar. Mantén pulsado para seleccionar el enlace.'); }
 		});
 	}
+
+	// Coach tips once per device
+	(function setupCoach() {
+		try {
+			const seen = localStorage.getItem('tachado_coach_seen');
+			if (!seen && coachTips) {
+				coachTips.classList.remove('hidden');
+				coachClose?.addEventListener('click', () => { coachTips.classList.add('hidden'); localStorage.setItem('tachado_coach_seen', '1'); });
+			}
+		} catch {}
+	})();
+
+	// A2HS: Android beforeinstallprompt
+	window.addEventListener('beforeinstallprompt', (e: any) => {
+		e.preventDefault();
+		deferredPrompt = e;
+		try { if (!localStorage.getItem('tachado_install_dismissed')) installBanner?.classList.remove('hidden'); } catch {}
+	});
+	installBtn?.addEventListener('click', async () => {
+		if (!deferredPrompt) return;
+		installBanner?.classList.add('hidden');
+		await deferredPrompt.prompt();
+		deferredPrompt = null;
+	});
+	installDismiss?.addEventListener('click', () => { installBanner?.classList.add('hidden'); try { localStorage.setItem('tachado_install_dismissed', '1'); } catch {} });
+
+	// iOS hint: show once if not standalone and Safari/iOS
+	(function setupIosHint() {
+		try {
+			const isStandalone = (window.navigator as any).standalone === true;
+			const ua = window.navigator.userAgent || '';
+			const isIOS = /iPhone|iPad|iPod/i.test(ua);
+			const isSafari = /Safari/i.test(ua) && !/CriOS|FxiOS|OPiOS|EdgiOS/i.test(ua);
+			if (isIOS && isSafari && !isStandalone && !localStorage.getItem('tachado_ios_hint_dismissed')) {
+				iosHint?.classList.remove('hidden');
+				iosDismiss?.addEventListener('click', () => { iosHint?.classList.add('hidden'); localStorage.setItem('tachado_ios_hint_dismissed', '1'); });
+			}
+		} catch {}
+	})();
 
 	if (undoBtn) {
 		undoBtn.addEventListener('click', () => {
