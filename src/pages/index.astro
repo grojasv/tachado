@@ -227,7 +227,18 @@ import DevFooter from '../components/DevFooter.astro';
 
 	if (shareBtn) {
 		shareBtn.addEventListener('click', async () => {
-			try { ensureSessionId(); const url = generateShareableUrl(sessionId); if (shareLinkInput) shareLinkInput.value = url; await navigator.clipboard.writeText(url); showToast('Link copied to clipboard'); }
+			try {
+				ensureSessionId();
+				const url = generateShareableUrl(sessionId);
+				if (shareLinkInput) shareLinkInput.value = url;
+				await navigator.clipboard.writeText(url);
+				showToast('Enlace copiado');
+				const original = shareBtn.textContent;
+				shareBtn.textContent = '✅ Copiado';
+				shareBtn.disabled = true;
+				shareBtn.classList.add('animate-pop');
+				setTimeout(() => { shareBtn.textContent = original || '📋'; shareBtn.disabled = false; shareBtn.classList.remove('animate-pop'); }, 1200);
+			}
 			catch { showToast('No se pudo copiar. Mantén pulsado para seleccionar el enlace.'); }
 		});
 	}
