@@ -10,7 +10,7 @@ import DevFooter from '../components/DevFooter.astro';
 			<div class="flex items-center justify-between">
 				<div>
 					<h1 class="title">Tachado</h1>
-					<p class="text-gray-700 text-sm">Simple, smooth todo lists</p>
+					<p class="text-gray-700 text-sm">Tareas rápidas y sin drama 😎</p>
 				</div>
 			</div>
 		</header>
@@ -27,22 +27,23 @@ import DevFooter from '../components/DevFooter.astro';
 			<div class="flex items-center gap-3">
 				<input 
 					type="text" 
-					placeholder="Add a new todo..." 
+					placeholder="Añade una tarea..." 
 					class="input"
 					id="todoInput"
 				>
 				<button 
 					class="btn-primary"
 					id="addTodoBtn"
+					aria-label="Añadir tarea"
 				>
-					Add
+					+
 				</button>
 			</div>
 		</div>
 
 		<!-- Active Todos -->
 		<div class="card card-hover p-4 md:p-6 mb-6">
-			<h2 class="text-lg font-semibold text-gray-800 mb-4">Active Todos</h2>
+			<h2 class="text-lg font-semibold text-gray-800 mb-4">Pendientes</h2>
 			<div id="activeTodos" class="space-y-3">
 				<div id="activeSkeleton" class="skeleton h-12"></div>
 			</div>
@@ -50,7 +51,7 @@ import DevFooter from '../components/DevFooter.astro';
 
 		<!-- Completed Todos -->
 		<div class="card card-hover p-4 md:p-6">
-			<h2 class="text-lg font-semibold text-gray-700 mb-4">Completed</h2>
+			<h2 class="text-lg font-semibold text-gray-700 mb-4">Tachados</h2>
 			<div id="completedTodos" class="space-y-3">
 				<div id="completedSkeleton" class="skeleton h-10 w-1/2"></div>
 			</div>
@@ -179,7 +180,7 @@ import DevFooter from '../components/DevFooter.astro';
 		todos.push(newTodo);
 		renderTodos();
 		scheduleSaveTodos(sessionId, todos);
-		announce('Todo added');
+		announce('Tarea añadida');
 		vibrate(10);
 		todoInput.value = '';
 	}
@@ -189,7 +190,7 @@ import DevFooter from '../components/DevFooter.astro';
 		todo.completed = !todo.completed;
 		renderTodos();
 		scheduleSaveTodos(sessionId, todos);
-		announce('Todo updated');
+		announce('Tarea actualizada');
 		vibrate(8);
 	}
 
@@ -217,7 +218,7 @@ import DevFooter from '../components/DevFooter.astro';
 		activeEls.forEach((el, idx) => { const t = todos.find(x => x.id === (el as HTMLElement).dataset.todoId); if (t) t.order = idx; });
 		completedEls.forEach((el, idx) => { const t = todos.find(x => x.id === (el as HTMLElement).dataset.todoId); if (t) t.order = activeEls.length + idx; });
 		scheduleSaveTodos(sessionId, todos);
-		announce('Order updated');
+		announce('Orden actualizado');
 	}
 	function updateSessionLabel() { if (sessionLabelFooter) sessionLabelFooter.textContent = sessionId; }
 
@@ -227,7 +228,7 @@ import DevFooter from '../components/DevFooter.astro';
 	if (shareBtn) {
 		shareBtn.addEventListener('click', async () => {
 			try { ensureSessionId(); const url = generateShareableUrl(sessionId); if (shareLinkInput) shareLinkInput.value = url; await navigator.clipboard.writeText(url); showToast('Link copied to clipboard'); }
-			catch { showToast('Copy failed. Tap and hold to select link.'); }
+			catch { showToast('No se pudo copiar. Mantén pulsado para seleccionar el enlace.'); }
 		});
 	}
 
