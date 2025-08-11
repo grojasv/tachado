@@ -150,6 +150,10 @@
     animation: skeleton-pulse 1.2s ease-in-out infinite;
   }
 
+  /* List min-heights to reduce CLS */
+  .list-active-min { min-height: 60px; }
+  .list-completed-min { min-height: 48px; }
+
   /* --- Modern playful design system additions --- */
 
   /* Fun gradient background with subtle radial glow */

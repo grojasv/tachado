@@ -208,7 +208,7 @@ Performance polish
 - [x] Defer SortableJS load until first render/interaction
 - [x] Preconnect to Firebase domain; consider dns-prefetch
 - [x] Inline critical CSS for above‑the‑fold; keep bundle lean
-- [ ] Reduce layout shifts: fixed heights for skeletons; consistent spacing
+- [x] Reduce layout shifts: fixed heights for skeletons; consistent spacing
 
 Accessibility (ES)
 - [ ] Stronger focus-visible outlines on interactive elements
