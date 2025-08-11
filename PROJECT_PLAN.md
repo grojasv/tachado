@@ -178,17 +178,50 @@ A mobile-first web application for creating and managing todo lists with smooth 
   - **Live URL**: https://tachado.netlify.app
 
 ### **Phase 8: Final Enhancements** 🎁 ⏳ IN PROGRESS
-**Goal**: Professional finishing touches and shareability
-- [ ] Replace Astro favicon with todo-themed icon
+**Goal**: App-like UX on mobile with professional polish
+
+- [ ] Replace Astro favicon with a todo-themed icon set (maskable)
 - [ ] Enhance README with comprehensive documentation (setup, env vars, deploy)
 - [x] Add clipboard integration for easy sharing (botón copia con feedback)
 - [x] Implement smart share button with visual feedback ("✅ Copiado")
-- **Deliverable**: Polished, shareable todo app
-- **Test**: Share functionality works across devices and browsers
-- **Success Metrics**:
-  - Professional branding and documentation
-  - Easy sharing with clipboard integration + visual feedback
-  - Comprehensive README and setup guides
+
+App-like mobile UX (high impact)
+- [ ] Theme/status bar polish: set `<meta name="theme-color">` to match background
+- [ ] iOS status bar style: `apple-mobile-web-app-status-bar-style=black-translucent`
+- [ ] Web Share API: use native share sheet on mobile; fallback to copy
+- [ ] “Deshacer” snackbar: undo after swipe-to-delete (5s)
+- [ ] Input UX: `enterkeyhint="done"`, autofocus on first load, clear-on-add, select-on-focus
+- [ ] Micro‑haptics: softer taps for reorder, stronger for delete; respect reduced motion
+- [ ] Tap targets: ensure 48px minimum on controls and drag handles
+
+Mobile PWA feel
+- [ ] Add to Home Screen hints: Android `beforeinstallprompt`; simple iOS banner with steps
+- [ ] Fullscreen feel: `viewport-fit=cover`; apply safe‑area paddings to header; minimize overscroll
+- [ ] Icons/splash: maskable icons 192/512, verify manifest `name`/`short_name`
+
+Navigation and feedback
+- [ ] Coach marks: one‑time tips (arrastra “⋮⋮”, desliza para borrar)
+- [ ] Empty states: friendly messages for “Pendientes” y “Tachados”
+- [ ] Reorder feedback: debounce/suppress repeated “Orden actualizado” toasts
+
+Performance polish
+- [ ] Defer SortableJS load until first render/interaction
+- [ ] Preconnect to Firebase domain; consider dns-prefetch
+- [ ] Inline critical CSS for above‑the‑fold; keep bundle lean
+- [ ] Reduce layout shifts: fixed heights for skeletons; consistent spacing
+
+Accessibility (ES)
+- [ ] Live announcements in español for add/delete/reorder (revisar cobertura)
+- [ ] Stronger focus-visible outlines on interactive elements
+- [ ] Increase contrast for secondary text and dividers where needed
+
+**Deliverable**: Mobile app‑like UX with polished branding and guidance
+**Test**: Feels native on iOS/Android, installable, intuitive, and accessible
+**Success Metrics**:
+  - App-like behavior on mobile (fullscreen, status bar, native share)
+  - Clear guidance (install hints, coach marks, empty states)
+  - Smooth interactions with appropriate haptics and feedback
+  - Excellent a11y and minimal layout shifts
 
 ## 🎨 Design Specifications
 
