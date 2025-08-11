@@ -180,8 +180,8 @@ A mobile-first web application for creating and managing todo lists with smooth 
 ### **Phase 8: Final Enhancements** 🎁 ⏳ IN PROGRESS
 **Goal**: App-like UX on mobile with professional polish
 
-- [ ] Replace Astro favicon with a todo-themed icon set (maskable)
-- [ ] Enhance README with comprehensive documentation (setup, env vars, deploy)
+- [x] Replace Astro favicon with a todo-themed icon set (maskable)
+- [ ] Enhance README with comprehensive documentation (setup, env vars, deploy) and link to project plan (this file) for more details
 - [x] Add clipboard integration for easy sharing (botón copia con feedback)
 - [x] Implement smart share button with visual feedback ("✅ Copiado")
 
