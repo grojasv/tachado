@@ -1,86 +1,74 @@
 # Tachado - Todo App
 
-A mobile-first web application for creating and managing todo lists with smooth animations, drag-and-drop reordering, and real-time sharing capabilities.
+A mobile-first todo app with real-time sharing, smooth drag-and-drop, and app-like mobile UX.
 
-## ✨ Features (Phase 2 Complete)
+Live: https://tachado.netlify.app
 
-### Core Todo Functionality
-- ✅ **Easy Text Entry**: Simple input field for adding todos
-- ✅ **Check/Uncheck**: Toggle todo completion status with smooth animations
-- ✅ **Strike-through Animation**: Smooth, lightweight visual feedback for completed items
-- ✅ **Item Movement**: Completed items move to bottom, active items stay at top
-- ✅ **Delete Functionality**: Remove todos with smooth removal animations
-- ✅ **Local Storage**: Todos persist between browser sessions
+## ✨ Features
 
-### Smooth Animations
-- ✅ **Entrance Animations**: New todos slide in smoothly
-- ✅ **Completion Transitions**: Items animate between active and completed sections
-- ✅ **Strike-through Effects**: Smooth text decoration changes
-- ✅ **Hover Effects**: Subtle scaling and shadow effects
-- ✅ **Delete Animations**: Items fade out and scale down when removed
+- Real-time sync (Firebase Realtime Database)
+- Session sharing with memorable URLs (e.g., `bravo-zorro-123`)
+- Drag & drop reordering (SortableJS)
+- Swipe to delete completed items (with haptics)
+- Offline-first with localStorage fallback
+- PWA: installable, works offline, service worker + manifest
+- Modern, glass-morphism UI with smooth animations
 
-### Mobile-First Design
-- ✅ **Responsive Layout**: Optimized for mobile devices (375px+)
-- ✅ **Touch-Friendly**: Large touch targets for easy interaction
-- ✅ **Glass Morphism**: Modern backdrop blur design
-- ✅ **Accessibility**: Reduced motion support for users with motion sensitivity
+## 🚀 Quick start
 
-## 🚀 Getting Started
+Prereqs: Node 18+, npm
 
-### Prerequisites
-- Node.js (version 16 or higher)
-- npm or yarn
-
-### Installation
 ```bash
-# Clone the repository
-git clone <repository-url>
+git clone https://github.com/grojasv/tachado.git
 cd tachado
-
-# Install dependencies
 npm install
-
-# Start development server
-npm run dev
+cp env.example .env          # add your Firebase values
+npm run dev                  # http://localhost:4321
 ```
 
-The app will be available at `http://localhost:4321`
+## 🔐 Environment variables
 
-## 🎯 Development Phases
+Create `.env` from `env.example` and fill in Firebase config (PUBLIC_ keys are exposed to client):
 
-- ✅ **Phase 1**: Foundation Setup - COMPLETED
-- ✅ **Phase 2**: Core Todo UI - COMPLETED
-- ⏳ **Phase 3**: Drag and Drop - PENDING
-- ⏳ **Phase 4**: Data Management - PENDING
-- ⏳ **Phase 5**: Visual Polish - PENDING
-- ⏳ **Phase 6**: PWA & Native Experience - PENDING
-- ⏳ **Phase 7**: Deployment - PENDING
-- ⏳ **Phase 8**: Final Enhancements - PENDING
+```
+PUBLIC_FIREBASE_API_KEY=
+PUBLIC_FIREBASE_AUTH_DOMAIN=
+PUBLIC_FIREBASE_DATABASE_URL=
+PUBLIC_FIREBASE_PROJECT_ID=
+PUBLIC_FIREBASE_STORAGE_BUCKET=
+PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+PUBLIC_FIREBASE_APP_ID=
+```
 
-## 🧞 Commands
+Note: After changing `.env`, restart the dev server so Astro picks up new values.
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
+## 🧭 Scripts
 
-## 🎨 Design Philosophy
+| Command           | Action                                           |
+|-------------------|--------------------------------------------------|
+| npm install       | Install dependencies                             |
+| npm run dev       | Start dev server (http://localhost:4321)         |
+| npm run build     | Build to `dist/`                                 |
+| npm run preview   | Preview the production build                     |
 
-- **Mobile-First**: Designed for mobile devices first, then enhanced for desktop
-- **Smooth Animations**: Lightweight, 60fps animations that enhance UX without impacting performance
-- **Simple & Clean**: Minimal interface focused on core functionality
-- **Accessible**: Support for reduced motion and keyboard navigation
+## ☁️ Deploy (Netlify)
 
-## 🔮 Upcoming Features
+1) Connect repo on Netlify (New site from Git → select `tachado`).
+2) Build command: `npm run build`  ·  Publish directory: `dist`
+3) Environment variables: add all `PUBLIC_FIREBASE_*` from `.env`
+4) Deploy. Netlify will auto-deploy on push to `main`.
 
-- Drag and drop reordering
-- Real-time sharing with Firebase
-- Progressive Web App (PWA) functionality
-- Offline support
-- Native-like mobile experience
+## 📱 PWA & Mobile UX
 
----
+- Install from browser (Add to Home Screen)
+- Safe-area padding for iOS
+- Native-like gestures and subtle haptics
 
-**Current Status**: 🎉 Phase 2 completed! Ready to begin Phase 3: Drag and Drop functionality.
+## 📄 Project plan
+
+See `PROJECT_PLAN.md` for phases, status, and next tasks.
+
+## ✅ Status
+
+- Phases 1–7: Completed
+- Phase 8: In Progress (mobile app-like polish)
