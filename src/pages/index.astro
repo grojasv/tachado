@@ -15,16 +15,7 @@ import DevFooter from '../components/DevFooter.astro';
 			</div>
 		</header>
 
-		<!-- Coach tips (one-time) -->
-		<div id="coachTips" class="card p-3 mb-3 hidden">
-			<div class="flex items-center justify-between">
-				<div class="flex flex-wrap gap-2 text-sm text-gray-700">
-					<span class="px-2 py-1 rounded-lg bg-blue-50 border border-blue-200">Arrastra “⋮⋮” para ordenar</span>
-					<span class="px-2 py-1 rounded-lg bg-pink-50 border border-pink-200">Desliza un tachado para borrar</span>
-				</div>
-				<button id="coachClose" class="btn-ghost text-xs px-2 py-1">Cerrar</button>
-			</div>
-		</div>
+
 
 		<!-- Install banners -->
 		<div id="installBanner" class="fixed left-1/2 -translate-x-1/2 bottom-6 z-50 hidden">
@@ -115,8 +106,6 @@ import DevFooter from '../components/DevFooter.astro';
 	const toast = document.getElementById('toast') as HTMLDivElement;
 	const undoBar = document.getElementById('undoBar') as HTMLDivElement;
 	const undoBtn = document.getElementById('undoBtn') as HTMLButtonElement;
-	const coachTips = document.getElementById('coachTips') as HTMLDivElement;
-	const coachClose = document.getElementById('coachClose') as HTMLButtonElement;
 	const installBanner = document.getElementById('installBanner') as HTMLDivElement;
 	const installBtn = document.getElementById('installBtn') as HTMLButtonElement;
 	const installDismiss = document.getElementById('installDismiss') as HTMLButtonElement;
@@ -337,16 +326,7 @@ import DevFooter from '../components/DevFooter.astro';
 		});
 	}
 
-	// Coach tips once per device
-	(function setupCoach() {
-		try {
-			const seen = localStorage.getItem('tachado_coach_seen');
-			if (!seen && coachTips) {
-				coachTips.classList.remove('hidden');
-				coachClose?.addEventListener('click', () => { coachTips.classList.add('hidden'); localStorage.setItem('tachado_coach_seen', '1'); });
-			}
-		} catch {}
-	})();
+
 
 	// A2HS: Android beforeinstallprompt
 	window.addEventListener('beforeinstallprompt', (e: any) => {
