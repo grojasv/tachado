@@ -101,9 +101,8 @@
       @apply w-6 h-6;
     }
     
-    button {
-      @apply min-h-[44px] px-4;
-    }
+    button { @apply min-h-[48px] px-4; }
+    .input { @apply min-h-[48px]; }
   }
 
   /* Reduced motion for accessibility */
