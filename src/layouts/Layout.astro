@@ -31,6 +31,13 @@ try { if (dbUrl) dbOrigin = new URL(dbUrl).origin; } catch {}
                 <link rel="dns-prefetch" href={dbOrigin} />
             </>
         )}
+        <style>
+          /* Critical inline CSS to avoid FOUC and reduce CLS */
+          html { -webkit-font-smoothing: antialiased; }
+          body { min-height: 100vh; background: radial-gradient(1200px 600px at -10% -10%, rgba(255, 200, 255, 0.25), transparent 60%), radial-gradient(800px 400px at 110% 10%, rgba(173, 216, 230, 0.25), transparent 60%), linear-gradient(135deg, #fafcff 0%, #f3f7ff 40%, #fef6ff 100%); }
+          main { max-width: 28rem; margin-left: auto; margin-right: auto; padding-left: 1rem; padding-right: 1rem; }
+          header { min-height: 3.25rem; }
+        </style>
 	</head>
 	<body class="app-bg-fun">
 		<main class="container mx-auto px-4 py-6 md:py-8">

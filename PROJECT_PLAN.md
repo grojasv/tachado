@@ -207,7 +207,7 @@ Navigation and feedback
 Performance polish
 - [x] Defer SortableJS load until first render/interaction
 - [x] Preconnect to Firebase domain; consider dns-prefetch
-- [ ] Inline critical CSS for above‑the‑fold; keep bundle lean
+- [x] Inline critical CSS for above‑the‑fold; keep bundle lean
 - [ ] Reduce layout shifts: fixed heights for skeletons; consistent spacing
 
 Accessibility (ES)
