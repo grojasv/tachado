@@ -20,7 +20,14 @@ import DevFooter from '../components/DevFooter.astro';
 		<!-- Live region for assistive tech announcements -->
 		<div class="sr-only" aria-live="polite" id="a11yAnnouncer"></div>
 		<!-- Toast -->
-		<div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-20 z-50 px-3 py-2 rounded-xl bg-black/80 text-white text-xs opacity-0 pointer-events-none transition-opacity"></div>
+		<div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-24 z-50 px-3 py-2 rounded-xl bg-black/80 text-white text-xs opacity-0 pointer-events-none transition-opacity"></div>
+		<!-- Undo snackbar -->
+		<div id="undoBar" class="fixed left-1/2 -translate-x-1/2 bottom-6 z-50 hidden">
+			<div class="flex items-center gap-3 px-4 py-2 rounded-xl shadow-lg bg-white/90 border border-gray-200">
+				<span class="text-sm text-gray-800">Tachado eliminado</span>
+				<button id="undoBtn" class="btn-ghost text-sm px-3 py-1">Deshacer</button>
+			</div>
+		</div>
 
 		<!-- Todo Input -->
 		<div class="card card-hover p-4 md:p-6 mb-6">
@@ -75,6 +82,8 @@ import DevFooter from '../components/DevFooter.astro';
 	const shareLinkInput = document.getElementById('shareLinkInput') as HTMLInputElement;
 	const announcer = document.getElementById('a11yAnnouncer') as HTMLDivElement;
 	const toast = document.getElementById('toast') as HTMLDivElement;
+	const undoBar = document.getElementById('undoBar') as HTMLDivElement;
+	const undoBtn = document.getElementById('undoBtn') as HTMLButtonElement;
 
 
 	function showToast(message: string) { if (!toast) return; toast.textContent = message; toast.style.opacity = '1'; setTimeout(() => { toast.style.opacity = '0'; }, 1400); }
@@ -84,6 +93,8 @@ import DevFooter from '../components/DevFooter.astro';
 	let todos: TodoItem[] = [];
 	let sessionId: string = '';
 	let cleanupRealtime: Function | null = null;
+	let lastDeleted: { todo: TodoItem; index: number } | null = null;
+	let undoTimer: number | null = null;
 
 	interface TodoItem { id: string; text: string; completed: boolean; createdAt: Date | number; order: number; }
 
@@ -169,10 +180,21 @@ import DevFooter from '../components/DevFooter.astro';
 		const tIndex = todos.findIndex(t => t.id === todoId);
 		if (tIndex === -1) return;
 		if (!todos[tIndex].completed) return; // only delete completed
+		lastDeleted = { todo: todos[tIndex], index: tIndex };
 		todos.splice(tIndex, 1);
 		renderTodos();
 		scheduleSaveTodos(sessionId, todos);
+		showUndo();
 	}
+
+	function showUndo() {
+		if (!undoBar) return;
+		undoBar.classList.remove('hidden');
+		if (undoTimer) { clearTimeout(undoTimer); }
+		undoTimer = window.setTimeout(() => { hideUndo(); lastDeleted = null; }, 5000);
+	}
+
+	function hideUndo() { if (undoBar) undoBar.classList.add('hidden'); if (undoTimer) { clearTimeout(undoTimer); undoTimer = null; } }
 
 	function addTodo(text: string) {
 		if (!text.trim()) return;
@@ -231,15 +253,34 @@ import DevFooter from '../components/DevFooter.astro';
 				ensureSessionId();
 				const url = generateShareableUrl(sessionId);
 				if (shareLinkInput) shareLinkInput.value = url;
-				await navigator.clipboard.writeText(url);
-				showToast('Enlace copiado');
-				const original = shareBtn.textContent;
-				shareBtn.textContent = '✅ Copiado';
-				shareBtn.disabled = true;
-				shareBtn.classList.add('animate-pop');
-				setTimeout(() => { shareBtn.textContent = original || '📋'; shareBtn.disabled = false; shareBtn.classList.remove('animate-pop'); }, 1200);
+				if (navigator.share) {
+					await navigator.share({ title: 'Tachado', text: 'Comparte tu lista', url });
+					showToast('Compartido');
+				} else {
+					await navigator.clipboard.writeText(url);
+					showToast('Enlace copiado');
+					const original = shareBtn.textContent;
+					shareBtn.textContent = '✅ Copiado';
+					shareBtn.disabled = true;
+					shareBtn.classList.add('animate-pop');
+					setTimeout(() => { shareBtn.textContent = original || '📋'; shareBtn.disabled = false; shareBtn.classList.remove('animate-pop'); }, 1200);
+				}
 			}
 			catch { showToast('No se pudo copiar. Mantén pulsado para seleccionar el enlace.'); }
+		});
+	}
+
+	if (undoBtn) {
+		undoBtn.addEventListener('click', () => {
+			if (!lastDeleted) { hideUndo(); return; }
+			const { todo, index } = lastDeleted;
+			const insertIndex = Math.min(Math.max(index, 0), todos.length);
+			todos.splice(insertIndex, 0, todo);
+			renderTodos();
+			scheduleSaveTodos(sessionId, todos);
+			showToast('Restaurado');
+			lastDeleted = null;
+			hideUndo();
 		});
 	}
 

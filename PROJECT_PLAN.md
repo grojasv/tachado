@@ -186,10 +186,10 @@ A mobile-first web application for creating and managing todo lists with smooth 
 - [x] Implement smart share button with visual feedback ("✅ Copiado")
 
 App-like mobile UX (high impact)
-- [ ] Theme/status bar polish: set `<meta name="theme-color">` to match background
+- [x] Theme/status bar polish: set `<meta name="theme-color">` to match background
 - [ ] iOS status bar style: `apple-mobile-web-app-status-bar-style=black-translucent`
-- [ ] Web Share API: use native share sheet on mobile; fallback to copy
-- [ ] “Deshacer” snackbar: undo after swipe-to-delete (5s)
+- [x] Web Share API: use native share sheet on mobile; fallback to copy
+- [x] “Deshacer” snackbar: undo after swipe-to-delete (5s)
 - [ ] Input UX: `enterkeyhint="done"`, autofocus on first load, clear-on-add, select-on-focus
 - [ ] Micro‑haptics: softer taps for reorder, stronger for delete; respect reduced motion
 - [ ] Tap targets: ensure 48px minimum on controls and drag handles
