@@ -197,7 +197,7 @@
 
   /* Titles */
   .title { @apply text-3xl font-extrabold tracking-tight text-gray-800; }
-  .subtitle { @apply text-sm text-gray-600; }
+  .subtitle { @apply text-sm text-gray-700; }
 
   /* Micro animations */
   @keyframes pop {

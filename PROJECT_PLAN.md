@@ -177,7 +177,7 @@ A mobile-first web application for creating and managing todo lists with smooth 
   - Production-ready build optimization
   - **Live URL**: https://tachado.netlify.app
 
-### **Phase 8: Final Enhancements** 🎁 ⏳ IN PROGRESS
+### **Phase 8: Final Enhancements** 🎁 ✅ COMPLETED
 **Goal**: App-like UX on mobile with professional polish
 
 - [x] Replace Astro favicon with a todo-themed icon set (maskable)
@@ -211,8 +211,8 @@ Performance polish
 - [x] Reduce layout shifts: fixed heights for skeletons; consistent spacing
 
 Accessibility (ES)
-- [ ] Stronger focus-visible outlines on interactive elements
-- [ ] Increase contrast for secondary text and dividers where needed
+- [x] Stronger focus-visible outlines on interactive elements
+- [x] Increase contrast for secondary text and dividers where needed
 
 **Deliverable**: Mobile app‑like UX with polished branding and guidance
 **Test**: Feels native on iOS/Android, installable, intuitive, and accessible
@@ -287,7 +287,7 @@ Each phase is complete when:
 - ✅ **Phase 5**: Visual Polish - COMPLETED
 - ✅ **Phase 6**: PWA & Native Experience - COMPLETED
 - ✅ **Phase 7**: Deployment - COMPLETED
-- ⏳ **Phase 8**: Final Enhancements - PENDING
+- ✅ **Phase 8**: Final Enhancements - COMPLETED
 
 ## 🎯 Key Features to Implement
 
