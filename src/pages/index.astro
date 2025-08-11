@@ -261,7 +261,22 @@ import DevFooter from '../components/DevFooter.astro';
 		vibrate(8);
 	}
 
-	function initializeSortable() {
+	let sortableLoading = false;
+	function ensureSortableLoaded(): Promise<void> {
+		return new Promise((resolve) => {
+			if ((window as any).Sortable) { resolve(); return; }
+			if (sortableLoading) { const check = setInterval(() => { if ((window as any).Sortable) { clearInterval(check); resolve(); } }, 50); return; }
+			sortableLoading = true;
+			const s = document.createElement('script');
+			s.src = 'https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js';
+			s.async = true;
+			s.onload = () => { resolve(); };
+			document.head.appendChild(s);
+		});
+	}
+
+	async function initializeSortable() {
+		await ensureSortableLoaded();
 		const SortableLib = (window as any).Sortable;
 		if (!SortableLib) return;
 		new SortableLib(activeTodos, { group: 'todos', animation: 200, ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen', dragClass: 'sortable-drag', delay: 150, delayOnTouchOnly: true, touchStartThreshold: 5, onEnd: () => { updateTodoOrder(); vibrate(6); } });
@@ -297,6 +312,7 @@ import DevFooter from '../components/DevFooter.astro';
 
 	addTodoBtn.addEventListener('click', () => addTodo(todoInput.value));
 	todoInput.addEventListener('keydown', (e) => { if ((e as KeyboardEvent).key === 'Enter') addTodo(todoInput.value); });
+	todoInput.addEventListener('focus', () => { try { (e as any); } catch {} (todoInput as any).select?.(); });
 
 	if (shareBtn) {
 		shareBtn.addEventListener('click', async () => {

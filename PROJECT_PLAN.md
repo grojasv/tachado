@@ -205,7 +205,7 @@ Navigation and feedback
 - [x] Reorder feedback: debounce/suppress repeated “Orden actualizado” toasts
 
 Performance polish
-- [ ] Defer SortableJS load until first render/interaction
+- [x] Defer SortableJS load until first render/interaction
 - [x] Preconnect to Firebase domain; consider dns-prefetch
 - [ ] Inline critical CSS for above‑the‑fold; keep bundle lean
 - [ ] Reduce layout shifts: fixed heights for skeletons; consistent spacing
